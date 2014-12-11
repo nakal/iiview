@@ -2,7 +2,7 @@
 #ifndef IIVIEW_COMMON_INCLUDED
 #define IIVIEW_COMMON_INCLUDED
 
-#define WINDOW_TITLE "iiview-0.30"
+#define WINDOW_TITLE "iiview-0.31"
 
 extern unsigned int dirsel;                         /* thumb selection vars */
 extern char *dir_int;                               /* internal image

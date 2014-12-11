@@ -42,9 +42,11 @@ IMGLIBS= -ljpeg -ltiff -lpng -lz
 
 EXECNAME=	bin/iiview
 OBJS    =       main.o filelist.o modules.o xsupport.o \
-                $(JPEGOBJ) gif.o bmp.o tif.o png.o compat.o
-OBJSFB  =       main.fo filelist.fo modules.fo xsupport.fo fbsupport.fo \
-                $(JPEGOBJFB) gif.fo bmp.fo tif.fo png.fo compat.fo
+                $(JPEGOBJ) gif.o bmp.o tif.o png.o compat.o \
+		pixeltools.o
+OBJSFB  =       main.fo filelist.fo modules.fo xsupport.fo \
+                $(JPEGOBJFB) gif.fo bmp.fo tif.fo png.fo compat.fo \
+		pixeltools.fo fbsupport.fo
 OBJSFBONLY  =   main.fbo filelist.fo modules.fo fbsupport.fo \
                 $(JPEGOBJFB) gif.fo bmp.fo tif.fo png.fo compat.fo
 LIBS	=	$(IMGLIBS) -lX11 -lm
@@ -67,7 +69,7 @@ INCPATH =       -I$(PREFIX)/include -I$(X11BASE)/include \
 LIBPATH =       -L$(X11BASE)/lib -L$(PREFIX)/lib \
 	-L$(X11BASE)/lib -L$(PREFIX)/lib $(IMGLIBPATH)
 
-OPTS	=       -O6 -ffast-math -fomit-frame-pointer -finline-functions \
+OPTS	=       -O2 -ffast-math -fomit-frame-pointer -finline-functions \
 -funroll-loops
 WARN    =       -W -Wall -Wstrict-prototypes -Wcast-align \
 		-Wcast-qual -Wshadow \
@@ -127,6 +129,9 @@ xsupport.o: common.h modules.h filelist.h fbsupport.h xsupport.c
 #fbsupport.o: common.h modules.h filelist.h fbsupport.c
 #	$(CC) $(DEFS) $(OPTS) $(WARN) -c -o fbsupport.o $(INCPATH) fbsupport.c
 
+pixeltools.o: pixeltools.h pixeltools.c
+	$(CC) $(DEFS) $(OPTS) $(WARN) -c -o pixeltools.o $(INCPATH) pixeltools.c
+
 bmp.o: bmp.h bmp.c
 	$(CC) $(DEFS) $(OPTS) $(WARN) -c -o bmp.o $(INCPATH) bmp.c
 
@@ -184,4 +189,6 @@ tif.fo: tif.h tif.c
 compat.fo: compat.h compat.c
 	$(CC) $(DEFSFB) $(OPTS) $(WARN) -c -o compat.fo $(INCPATH) compat.c
 
+pixeltools.fo: pixeltools.h pixeltools.c
+	$(CC) $(DEFSFB) $(OPTS) $(WARN) -c -o pixeltools.fo $(INCPATH) pixeltools.c
 

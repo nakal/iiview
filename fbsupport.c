@@ -36,6 +36,7 @@
 #include "common.h"
 #include "modules.h"
 #include "filelist.h"
+#include "pixeltools.h"
 #include "fbsupport.h"
 
 /* FB supporting stuff */
@@ -524,8 +525,8 @@ int FB_FullScreenIMG(const char *filename,const char *imagename)
 
 	for (y=0;y<(int)cf.h;y++)
 		for (x=0;x<(int)cf.w;x++)
-			FB_PutPixel(x,y,module[eix].getpixel(x*width/w,
-			    y*height/h,1));
+			FB_PutPixel(x,y,
+			    getinterpolatedpixel(eix, x*width/w, y*height/h));
 
 	module[eix].close();
 

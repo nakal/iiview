@@ -30,6 +30,7 @@
 
 #include "modules.h"
 #include "filelist.h"
+#include "pixeltools.h"
 
 #include "xsupport.h"
 
@@ -811,8 +812,9 @@ int x_FullScreenIMG(char *filename,char *imgname)
 					for (y=0;y<drawh;y++) {
 						for (x=0;x<draww;x++)
 							x_PutPixel(line, x, 0,
-							    module[eix].getpixel((int)(x*ww),
-							    (int)(y*hh),1));
+							    getinterpolatedpixel(eix, x*ww, y*hh));
+/*							    module[eix].getpixel((int)(x*ww),
+							    (int)(y*hh),1));*/
 						XPutImage(display,mywin,ngc,imageline,0,0,0,(signed)y,draww,1);
 					}
 					break;
