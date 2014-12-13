@@ -7,6 +7,16 @@ view. The most notable feature is that it only has a
 few dependencies, because it operates directly ontop of
 the X API.
 
+## Screenshots
+
+### Default iiview thumb view
+
+![iiview thumb view](https://lh4.googleusercontent.com/-SBk3VMOES9o/VIxf2Y3XOXI/AAAAAAAAGHo/lMfC2rUoM3A/w862-h767-no/iiview-thumbview.jpg)
+
+### Full screen view
+
+![iiview fullscreen view](https://lh3.googleusercontent.com/-yvELjirxeDU/VIxf1jAjcgI/AAAAAAAAGHg/adbFDgRh0Qk/w862-h767-no/iiview-fullscreen.jpg)
+
 ## For the impatient people
 
 1) Type in: "make" or "make withfb" or "make withfbonly"
