@@ -14,6 +14,8 @@
 static FILE *pngfile;
 static int readsuccessful;
 static int width,height;
+static png_structp png_ptr;
+static png_infop info_ptr;
 
 static png_bytep *row_pointers;
 
@@ -21,14 +23,15 @@ int PNG_OpenFile(const char *filename,const char *imgdir,
     unsigned int owidth, unsigned int oheight) {
 
 	unsigned char testbuf[8];
-	png_structp png_ptr;
-	png_infop info_ptr;
 	int i,rowbytes,color_type,bit_depth;
 
 	UNUSED(imgdir); UNUSED(owidth); UNUSED(oheight);
 
 	readsuccessful=0;
 	row_pointers=NULL;
+	png_ptr = NULL;
+	info_ptr = NULL;
+	pngfile=NULL;
 
 	if (filename==NULL) {
 #ifdef DEBUG
@@ -37,7 +40,6 @@ int PNG_OpenFile(const char *filename,const char *imgdir,
 		return 0;
 	}
 
-	pngfile=NULL;
 	if ((pngfile=fopen(filename,"r"))==NULL) {
 #ifdef DEBUG
 		fprintf(stderr,"PNG: File '%s' not found (in: '%s').\n",filename,
@@ -129,6 +131,7 @@ int PNG_OpenFile(const char *filename,const char *imgdir,
 	fprintf(stderr,"PNG: Completed.\n");
 #endif
 
+	png_read_end(png_ptr, NULL);
 	readsuccessful=1;
 
 	fclose(pngfile);
@@ -139,6 +142,8 @@ int PNG_OpenFile(const char *filename,const char *imgdir,
 void PNG_CloseFile(void) {
 
 	int i;
+
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 	if (row_pointers!=NULL) {
 		for (i=0;i<height;i++) {
