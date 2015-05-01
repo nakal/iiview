@@ -69,10 +69,10 @@ INCPATH =       -I$(PREFIX)/include -I$(X11BASE)/include \
 LIBPATH =       -L$(X11BASE)/lib -L$(PREFIX)/lib \
 	-L$(X11BASE)/lib -L$(PREFIX)/lib $(IMGLIBPATH)
 
-OPTS	=       -O2 -ffast-math -fomit-frame-pointer -finline-functions \
--funroll-loops
+OPTS=$(CFLAGS)
+#OPTS=-g
 WARN    =       -W -Wall -Wstrict-prototypes -Wcast-align \
-		-Wcast-qual -Wshadow \
+		-Wcast-qual -Wshadow -pedantic \
 		-Waggregate-return -Wmissing-prototypes \
 		-Wredundant-decls -Wnested-externs -Wlong-long \
 		-Wmissing-declarations
@@ -93,13 +93,13 @@ make-man:
 	gzip -c ./man/src/iiview.1 > ./man/man1/iiview.1.gz
 
 compile:
-	$(CC) $(DEFS) $(OPTS) $(WARN) -o $(EXECNAME) $(LIBPATH) $(OBJS) $(LIBS)
+	$(CC) $(DEFS) $(LDFLAGS) $(WARN) -o $(EXECNAME) $(LIBPATH) $(OBJS) $(LIBS)
 
 fbcompile:
-	$(CC) $(DEFSFB) $(OPTS) $(WARN) -o $(EXECNAME) $(LIBPATH) $(OBJSFB) $(LIBSFB)
+	$(CC) $(DEFSFB) $(LDFLAGS) $(WARN) -o $(EXECNAME) $(LIBPATH) $(OBJSFB) $(LIBSFB)
 
 fbonlycompile:
-	$(CC) $(DEFSFBONLY) $(OPTS) $(WARN) -o $(EXECNAME) $(LIBPATH) $(OBJSFBONLY) $(LIBSFBONLY)
+	$(CC) $(DEFSFBONLY) $(LDFLAGS) $(WARN) -o $(EXECNAME) $(LIBPATH) $(OBJSFBONLY) $(LIBSFBONLY)
 
 pre-compile:
 	test -d ./bin || mkdir ./bin

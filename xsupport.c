@@ -1135,6 +1135,7 @@ void x_EventLoop(char *selectedfile, size_t selectedfilesize)
 	unsigned int nr;
 
 	exitnow=0;
+	x_ClearThumbs();
 	while (!exitnow) {
 		if (!event_occured) XNextEvent(display,&event);
 		event_occured=0;
@@ -1174,14 +1175,11 @@ void x_EventLoop(char *selectedfile, size_t selectedfilesize)
 			exitnow=1;
 			break;
 		case Expose:
-
 			while (XCheckTypedEvent(display,Expose,&event));
-
 			if (event.xexpose.count!=0) break;
 			x_UpdateScreen(1, selectedfile);
 			break;
 		case ConfigureNotify:
-
 			while (XCheckTypedEvent(display,ConfigureNotify,&event));
 			fp=fopen(configpath,"w");
 			if (fp!=0) {
