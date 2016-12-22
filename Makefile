@@ -71,6 +71,7 @@ LIBPATH =       -L$(X11BASE)/lib -L$(PREFIX)/lib \
 
 OPTS=$(CFLAGS)
 #OPTS=-g
+#WARN=-Weverything -Werror -Wno-padded -Wno-reserved-id-macro
 WARN    =       -W -Wall -Wstrict-prototypes -Wcast-align \
 		-Wcast-qual -Wshadow -pedantic \
 		-Waggregate-return -Wmissing-prototypes \

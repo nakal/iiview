@@ -18,8 +18,8 @@
 extern int TIF_OpenFile(const char *,const char *, unsigned int, unsigned int);
 extern void TIF_CloseFile(void);
 extern unsigned int TIF_GetPixel(int,int,int);
-extern int TIF_GetWidth(void);
-extern int TIF_GetHeight(void);
+extern size_t TIF_GetWidth(void);
+extern size_t TIF_GetHeight(void);
 
 extern int TIF_SetDirectory(const char *, const char *);
 extern int TIF_GetFileList(const char *, const char *);

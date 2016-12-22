@@ -172,11 +172,11 @@ unsigned int PNG_GetPixel(int x,int y,int color) {
 	return ((int)*p<<16)|((int)*(p+1)<<8)|(*(p+2));
 }
 
-int PNG_GetWidth(void) {
+size_t PNG_GetWidth(void) {
 	return width;
 }
 
-int PNG_GetHeight(void) {
+size_t PNG_GetHeight(void) {
 	return height;
 }
 

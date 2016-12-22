@@ -32,8 +32,8 @@ int            JPEG_OpenFile(const char *,const char *, unsigned int,
     unsigned int);
 void           JPEG_CloseFile(void);
 unsigned int   JPEG_GetPixel(int,int,int);
-int            JPEG_GetWidth(void);
-int            JPEG_GetHeight(void);
+size_t         JPEG_GetWidth(void);
+size_t         JPEG_GetHeight(void);
 
 #endif
 

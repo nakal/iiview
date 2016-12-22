@@ -95,11 +95,11 @@ unsigned int TIF_GetPixel(int x,int y,int col) {
 
 }
 
-int TIF_GetWidth(void) {
+size_t TIF_GetWidth(void) {
 	return tif_width;
 }
 
-int TIF_GetHeight(void) {
+size_t TIF_GetHeight(void) {
 	return tif_height;
 }
 

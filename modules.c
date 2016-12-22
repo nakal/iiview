@@ -14,27 +14,27 @@
 #endif
 
 #define JPEG_EXT_COUNT 3
-const char *jpeg_extensions[JPEG_EXT_COUNT]={".jpg",".JPG",".jpeg"};
+static const char *jpeg_extensions[JPEG_EXT_COUNT]={".jpg",".JPG",".jpeg"};
 #endif
 
 #include "gif.h"
 #define GIF_EXT_COUNT 2
-const char *gif_extensions[GIF_EXT_COUNT]={".gif",".GIF"};
+static const char *gif_extensions[GIF_EXT_COUNT]={".gif",".GIF"};
 
 #include "bmp.h"
 #define BMP_EXT_COUNT 2
-const char *bmp_extensions[BMP_EXT_COUNT]={".bmp",".BMP"};
+static const char *bmp_extensions[BMP_EXT_COUNT]={".bmp",".BMP"};
 
 #ifdef INCLUDE_TIFF
 #include "tif.h"
 #define TIF_EXT_COUNT 5
-const char *tif_extensions[TIF_EXT_COUNT]={".tif",".TIF",".tiff",".nef",".NEF"};
+static const char *tif_extensions[TIF_EXT_COUNT]={".tif",".TIF",".tiff",".nef",".NEF"};
 #endif
 
 #ifdef INCLUDE_PNG
 #include "png.h"
 #define PNG_EXT_COUNT 2
-const char *png_extensions[PNG_EXT_COUNT]={".png",".PNG"};
+static const char *png_extensions[PNG_EXT_COUNT]={".png",".PNG"};
 #endif
 
 module_type module[MODULES_COUNT];
@@ -139,7 +139,7 @@ int modules_knownextension(const char *extension)
 
 int modules_extensionindex(const char *extension)
 {
-	int m,i;
+	size_t m, i;
 	const char *ext;
 
 	ext = strrchr(extension, '.');
@@ -148,7 +148,7 @@ int modules_extensionindex(const char *extension)
 	for (m=0;m<MODULES_COUNT;m++) {
 		for (i=0;i<module[m].extension_count;i++) {
 			if (strstr(ext,module[m].extension[i]))
-				return m;
+				return (int)m;
 		}
 	}
 	return -1;

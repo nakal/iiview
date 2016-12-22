@@ -1199,12 +1199,12 @@ inline uint YUV2RGB(JPEG_FLOATTYPE *val)
 }
 
 /* some externals, to determine the image dimension */
-int JPEG_GetWidth(void)
+size_t JPEG_GetWidth(void)
 {
 	return FrameHeader.X;
 }
 
-int JPEG_GetHeight(void)
+size_t JPEG_GetHeight(void)
 {
 	return FrameHeader.Y;
 }

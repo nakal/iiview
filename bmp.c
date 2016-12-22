@@ -269,12 +269,12 @@ unsigned int BMP_GetPixel(int x,int y,int col)
 	else return BMP_ToBW(color);
 }
 
-int BMP_GetWidth(void)
+size_t BMP_GetWidth(void)
 {
 	return width;
 }
 
-int BMP_GetHeight(void)
+size_t BMP_GetHeight(void)
 {
 	return height;
 }

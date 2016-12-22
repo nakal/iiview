@@ -53,8 +53,8 @@ static int x_nextPic(void);
 static int x_prevPic(void);
 static void x_PutPixel(image_t *, size_t, size_t, unsigned int);
 static image_t * x_AllocImage(size_t x, size_t y, size_t unit);
-static void x_SetTitle(const char *suffix, unsigned int picw,
-    unsigned int pich);
+static void x_SetTitle(const char *suffix, size_t picw,
+    size_t pich);
 
 /*
    void x_InitConnection(void);
@@ -70,21 +70,21 @@ static void x_ClearThumbs(void);
    static prototypes
    */
 
-Display *display;                             /* connection to X11 */
-int screen_nr,                                /* misc. flags and vars */
+static Display *display;                             /* connection to X11 */
+static int screen_nr,                                /* misc. flags and vars */
     window_big_enough;
-unsigned int bitsperpixel=0, screen_depth=0;
+static unsigned int bitsperpixel=0, screen_depth=0;
 
-Window mywin;                                 /* window instance */
-XEvent event;                                 /* event data */
-Colormap colormap;                            /* new colormap for 256 colors */
-XSetWindowAttributes mywinattribs;            /* win attributes */
-Visual *visual=NULL;                               /* visual for our window */
-int RED_POS,GREEN_POS,BLUE_POS;               /* XWindow color masking stuff */
-int RED_BITS,GREEN_BITS,BLUE_BITS;            /* ... */
+static Window mywin;                                 /* window instance */
+static XEvent event;                                 /* event data */
+static Colormap colormap;                            /* new colormap for 256 colors */
+static XSetWindowAttributes mywinattribs;            /* win attributes */
+static Visual *visual=NULL;                               /* visual for our window */
+static int RED_POS,GREEN_POS,BLUE_POS;               /* XWindow color masking stuff */
+static int RED_BITS,GREEN_BITS,BLUE_BITS;            /* ... */
 static image_t *blackimage=NULL;
-size_t thumbstride=0;
-size_t pixel_bytes=0;
+static size_t thumbstride=0;
+static size_t pixel_bytes=0;
 
 /* RGB 8-bit custom conversion macro */
 #define RGB2XRGB8(val) ((((val >> 16)&0xFF)/43)*36)+  \
@@ -119,22 +119,23 @@ void x_PutPixel(image_t *img, size_t x, size_t y, unsigned int val)
 {
 	unsigned int c;
 
-	c=x_GetColor(val);
 	assert(x<img->width && y<img->height);
+	c = x_GetColor(val);
+
 	switch (img->unit)
 	{
 	case 8:
-		((unsigned char *)img->buffer)[x+y*img->width]=c;
+		((unsigned char *)img->buffer)[x+y*img->width] =
+		    (unsigned char)c;
 		break;
 	case 15:
-		((unsigned short int *)img->buffer)[x+y*img->width]=c;
-		break;
 	case 16:
-		((unsigned short int *)img->buffer)[x+y*img->width]=c;
+		((unsigned short *)img->buffer)[x+y*img->width] =
+		    (unsigned short)c;
 		break;
 	case 24:
 	case 32:
-		((unsigned int *)img->buffer)[x+y*img->width]=c;
+		((unsigned int *)img->buffer)[x+y*img->width] = c;
 		break;
 	}
 }
@@ -155,9 +156,9 @@ image_t * x_AllocImage(size_t x, size_t y, size_t unit) {
 			i=NULL;
 		} else {
 			i->ximage= XCreateImage(display, visual, screen_depth,
-			    ZPixmap, 0,
-			    i->buffer, i->width, i->height,
-			    i->unit, i->width*pixel_bytes);
+			    ZPixmap, 0, i->buffer,
+			    (unsigned int)i->width, (unsigned int)i->height,
+			    (int)i->unit, (int)(i->width * pixel_bytes));
 			if (i->ximage==NULL) {
 				free(i->buffer);
 				free(i);
@@ -218,26 +219,26 @@ void x_ReadConfig(FILE *fp)
 		if ((p=strchr(s,'='))==NULL) continue;
 		*p++=0;
 
-		if (!strcmp(c,"xpos")) {
-			cf.x=atoi(p);
+		if (strcmp(c,"xpos") == 0) {
+			cf.x = (unsigned int)strtoul(p, NULL, 10);
 			continue;
 		}
-		if (!strcmp(c,"ypos")) {
-			cf.y=atoi(p);
+		if (strcmp(c,"ypos") == 0) {
+			cf.y = (unsigned int)strtoul(p, NULL, 10);
 			continue;
 		}
-		if (!strcmp(c,"width")) {
-			cf.w=atoi(p);
+		if (strcmp(c,"width") == 0) {
+			cf.w = (unsigned int)strtoul(p, NULL, 10);
 			continue;
 		}
-		if (!strcmp(c,"height")) {
-			cf.h=atoi(p);
+		if (strcmp(c,"height") == 0) {
+			cf.h = (unsigned int)strtoul(p, NULL, 10);
 			continue;
 		}
 	}
 #ifdef VERBOSE
 	printf("Config file params: (%d,%d ; %dx%d)\n",cf.x,cf.y,cf.w,cf.h);
-#endif 
+#endif
 }
 
 /* initialize the X-connection */
@@ -245,7 +246,7 @@ void x_InitConnection(const char *display_name)
 {
 	XVisualInfo visualinfo;
 	XVisualInfo *retvinfo;
-	int i,v, retv;
+	int retv;
 	image_t *ii;
 
 #ifdef CJK
@@ -273,7 +274,7 @@ void x_InitConnection(const char *display_name)
 	}
 	memcpy(&visualinfo, retvinfo, sizeof(XVisualInfo));
 	XFree(retvinfo);
-	screen_depth=visualinfo.depth; /* used bits per pixel */
+	screen_depth = (unsigned int)visualinfo.depth; /* used bits per pixel */
 	bitsperpixel=screen_depth;
 
 	/* fill up to byte boundaries */
@@ -302,34 +303,44 @@ void x_InitConnection(const char *display_name)
 	pixel_bytes =  bitsperpixel/8;
 
 	if (visualinfo.class==PseudoColor) {
+		unsigned short v;
+		size_t i;
 
 		/* check if Pseudo missing XXX */
 		colormap=XCreateColormap(display,RootWindow(display,screen_nr),
 		    visual,AllocAll);
-		colors=(XColor *)calloc(216,sizeof(XColor));
-		for (i=0;i<216;i++) {
-			colors[i].pixel=i;
-			colors[i].flags=DoRed|DoGreen|DoBlue;
+		colors = (XColor *)calloc(216, sizeof(XColor));
+		for (i = 0 ; i < 216; i++) {
+			colors[i].pixel = (unsigned long)i;
+			colors[i].flags = DoRed | DoGreen | DoBlue;
 
 			v=(i / 36) % 6;
-			colors[i].red=v*13107;
+			colors[i].red = (unsigned short)(v * 13107u);
 			v=(i / 6) % 6;
-			colors[i].green=v*13107;
+			colors[i].green = (unsigned short)(v * 13107u);
 			v=i % 6;
-			colors[i].blue=v*13107;
+			colors[i].blue = (unsigned short)(v * 13107u);
 		}
 		XStoreColors(display,colormap,colors,216);
 	} else {
 		/* adaption of a visual */
+		unsigned long i;
 
-		RED_POS=BLUE_POS=GREEN_POS=0;
-		RED_BITS=BLUE_BITS=GREEN_BITS=0;
-		for (i=visualinfo.red_mask;!(i&1);i>>=1,RED_POS++);
-		for (;i&1;i>>=1,RED_BITS++);
-		for (i=visualinfo.green_mask;!(i&1);i>>=1,GREEN_POS++);
-		for (;i&1;i>>=1,GREEN_BITS++);
-		for (i=visualinfo.blue_mask;!(i&1);i>>=1,BLUE_POS++);
-		for (;i&1;i>>=1,BLUE_BITS++);
+		RED_POS = BLUE_POS = GREEN_POS = 0;
+		RED_BITS = BLUE_BITS = GREEN_BITS = 0;
+
+		for (i = visualinfo.red_mask; !(i & 1); i >>= 1, RED_POS++)
+			;
+		for (; i & 1; i >>= 1, RED_BITS++)
+			;
+		for (i = visualinfo.green_mask; !(i & 1); i >>= 1, GREEN_POS++)
+			;
+		for (; i & 1; i >>= 1, GREEN_BITS++)
+			;
+		for (i = visualinfo.blue_mask; !(i & 1); i >>= 1, BLUE_POS++)
+			;
+		for (; i & 1; i >>= 1, BLUE_BITS++)
+			;
 	}
 
 #ifdef VERBOSE
@@ -359,9 +370,11 @@ void x_InitXWindowStuff(void)
 {
 	FILE *fp;
 
-	cf.x=50;cf.y=10;
-	cf.w=DisplayWidth(display,screen_nr)-100;
-	cf.h=DisplayHeight(display,screen_nr)-100;
+	/* default window position */
+	cf.x = 50;
+	cf.y = 10;
+	cf.w = (unsigned int)DisplayWidth(display, screen_nr) - 100;
+	cf.h = (unsigned int)DisplayHeight(display, screen_nr) - 100;
 
 	if ((fp=fopen(configpath,"r"))==NULL) {
 		fp=fopen(configpath,"w");
@@ -406,7 +419,7 @@ void x_InitXWindowStuff(void)
 	XMapWindow(display,mywin);
 }
 
-void x_SetTitle(const char *suffix, unsigned int picw, unsigned int pich) {
+static void x_SetTitle(const char *suffix, size_t picw, size_t pich) {
 
 	size_t title_len;
 	char *title;
@@ -416,7 +429,7 @@ void x_SetTitle(const char *suffix, unsigned int picw, unsigned int pich) {
 
 	if (picw==0 || pich==0) dim[0]=0;
 	else {
-		snprintf(dim, sizeof(dim), " (%dx%d)", picw, pich);
+		snprintf(dim, sizeof(dim), " (%zux%zu)", picw, pich);
 		dim[32]=0;
 	}
 
@@ -483,7 +496,7 @@ void x_ClearThumbs(void) {
 void x_OutputFilename(GC gc,unsigned int nr)
 {
 	XGCValues values;
-	int x,y;
+	size_t x, y;
 	char *filename;
 
 #ifdef VERBOSE
@@ -494,10 +507,9 @@ void x_OutputFilename(GC gc,unsigned int nr)
 		values.foreground=x_GetColor(0x00FFFFFF);
 	else values.foreground=x_GetColor(0x00000000);
 	XChangeGC(display,gc,GCForeground|GCBackground,&values);
-	x=(nr % THUMB_INLINE[THUMB_MODE])*thumbwidth;
-	y=((nr / THUMB_INLINE[THUMB_MODE])+1)*(thumbheight+20)-
-	    10;
-	XFillRectangle(display,mywin,gc,x,y-9,thumbwidth-1,10);
+	x = (nr % THUMB_INLINE[THUMB_MODE])*thumbwidth;
+	y = ((nr / THUMB_INLINE[THUMB_MODE])+1)*(thumbheight+20) - 10;
+	XFillRectangle(display, mywin, gc, (int)x, (int)(y-9), thumbwidth-1, 10);
 
 	if (dirsel!=nr) {
 		if (is_file_dir(file,nr))
@@ -507,13 +519,13 @@ void x_OutputFilename(GC gc,unsigned int nr)
 	filename=get_file(file,nr);
 	if (filename!=NULL) {
 #ifdef CJK
-		int len=0;
+		size_t len=0;
 
-		len=strlen(filename);
+		len = strlen(filename);
 		XChangeGC(display,gc,GCForeground|GCBackground,&values);
 
 		/* printf("filename: %s (%i)\n", filename, len); */
-		XmbDrawString(display,mywin,font_set,gc,x,y,filename,len);
+		XmbDrawString(display,mywin,font_set,gc,(int)x,(int)y,filename,(int)len);
 #else
 		XChangeGC(display,gc,GCForeground|GCBackground,&values);
 		XDrawString(display,mywin,gc,x,y,filename,
@@ -532,9 +544,10 @@ void x_UpdateThumbs(GC gc, const char *selectedfile)
 	char *curdir;
 	const char *curfile;
 	unsigned int x,y;
-	int xx,yy,tw,th;
+	size_t xx, yy, tw, th;
 	unsigned char n;
-	int eix,width,height;
+	size_t width, height;
+	int eix;
 	image_t *img=NULL;
 	char imgdir[MAXPATHLEN];
 
@@ -612,13 +625,11 @@ void x_UpdateThumbs(GC gc, const char *selectedfile)
 
 						if (((float)width/height)>
 						    ((float)thumbwidth/thumbheight)) {
-							tw=thumbwidth;
-							th=(float)height/width
-							    *thumbwidth;
+							tw = thumbwidth;
+							th = height * thumbwidth / width;
 						} else {
-							tw=(float)width/height
-							    *thumbheight;
-							th=thumbheight;
+							tw = thumbheight * width / height;
+							th = thumbheight;
 						}
 
 #ifdef VERBOSE
@@ -626,11 +637,11 @@ void x_UpdateThumbs(GC gc, const char *selectedfile)
 						    width,height);
 #endif
 
-						for (yy=0;yy<(int)thumbheight+20;yy++)
-							for (xx=0;xx<(int)thumbwidth;xx++)
+						for (yy=0;yy<thumbheight+20;yy++)
+							for (xx=0;xx<thumbwidth;xx++)
 								x_PutPixel(img,xx,yy,
-								    module[eix].getpixel((int)((float)xx/tw*width),
-								    (int)((float)yy/th*height),1));
+								    module[eix].getpixel((int)(xx * width / tw),
+								    (int)(yy * height / th), 1));
 					} else {
 						/* error reading! */
 						img=blackimage;
@@ -733,10 +744,6 @@ void x_HelpScreen(void)
 	    ButtonPressMask,&event);
 }
 
-#define swap(a,b) {\
-	int swapv; \
-	swapv=a; a=b; b=swapv; }
-
 #define REQUEST_NONE 1
 #define REQUEST_PREVIOUS 10
 #define REQUEST_NEXT 11
@@ -746,7 +753,9 @@ int x_FullScreenIMG(char *filename,char *imgname)
 {
 	image_t *line;
 	XImage *imageline;
-	int w,h,eix,width,height,done,drawn;
+	int eix,done,drawn;
+	size_t w, h;
+	size_t width, height;
 	FILE *fp;
 	GC ngc;
 	XGCValues values;
@@ -779,7 +788,11 @@ int x_FullScreenIMG(char *filename,char *imgname)
 			draww=cf.w;
 			drawh=cf.h;
 			if (rotation&1) {
-				swap(draww,drawh);
+				unsigned int hh;
+
+				hh = draww;
+				draww = drawh;
+				drawh = hh;
 			}
 
 			if (((double)draww/drawh)<((double)width/height)) {
@@ -802,17 +815,17 @@ int x_FullScreenIMG(char *filename,char *imgname)
 				hh=(double)height/h;
 				imageline=XCreateImage(display,visual,screen_depth ,ZPixmap,0,
 				    line->buffer,
-				    (rotation&1)==0 ? line->width : 1,
-				    (rotation&1)==0 ? 1 : line->width,
+				    (rotation&1)==0 ? (unsigned int)line->width : 1,
+				    (rotation&1)==0 ? 1 : (unsigned int)line->width,
 				    /* (int)(bitsperpixel==24 ? 32 : bitsperpixel) */
-				    line->unit, ((rotation&1)==0 ? line->width : 1)*pixel_bytes);
+				    (int)line->unit, (int)(((rotation&1)==0 ? line->width : 1)*pixel_bytes));
 
 				switch (rotation&3) {
 				case 0:
 					for (y=0;y<drawh;y++) {
 						for (x=0;x<draww;x++)
 							x_PutPixel(line, x, 0,
-							    getinterpolatedpixel(eix, x*ww, y*hh));
+							    getinterpolatedpixel((size_t)eix, x*ww, y*hh));
 /*							    module[eix].getpixel((int)(x*ww),
 							    (int)(y*hh),1));*/
 						XPutImage(display,mywin,ngc,imageline,0,0,0,(signed)y,draww,1);
@@ -824,7 +837,7 @@ int x_FullScreenIMG(char *filename,char *imgname)
 							x_PutPixel(line, x, 0,
 							    module[eix].getpixel((int)(x*ww),
 							    (int)(y*hh),1));
-						XPutImage(display,mywin,ngc,imageline,0,0,(signed)drawh-y-1,0,1,draww);
+						XPutImage(display,mywin,ngc,imageline,0,0,(int)(drawh-y-1),0,1,draww);
 					}
 					break;
 				case 2:
@@ -833,7 +846,7 @@ int x_FullScreenIMG(char *filename,char *imgname)
 							x_PutPixel(line, draww-x-1, 0,
 							    module[eix].getpixel((int)(x*ww),
 							    (int)(y*hh),1));
-						XPutImage(display,mywin,ngc,imageline,0,0,0,(signed)drawh-y-1,draww,1);
+						XPutImage(display,mywin,ngc,imageline,0,0,0,(int)(drawh-y-1),draww,1);
 					}
 					break;
 				case 3:
@@ -896,10 +909,10 @@ int x_FullScreenIMG(char *filename,char *imgname)
 		case ConfigureNotify:
 			fp=fopen(configpath,"w");
 			if (fp!=0) {
-				cf.x=event.xconfigure.x;
-				cf.y=event.xconfigure.y;
-				cf.w=event.xconfigure.width;
-				cf.h=event.xconfigure.height;
+				cf.x = (unsigned int)event.xconfigure.x;
+				cf.y = (unsigned int)event.xconfigure.y;
+				cf.w = (unsigned int)event.xconfigure.width;
+				cf.h = (unsigned int)event.xconfigure.height;
 				fprintf(fp,"\n# iiviewrc - configuration file for iiview\n\n");
 				fprintf(fp,"xpos=%d\n",cf.x);
 				fprintf(fp,"ypos=%d\n",cf.y);
@@ -1020,7 +1033,7 @@ static int x_nextPic(void) {
 /* keyboard handler */
 int x_HandleKey(KeySym key, char *selectedfile, size_t selectedfilesize)
 {
-	int i;
+	unsigned int i;
 
 	switch (key) {
 	case XK_Up:
@@ -1160,9 +1173,9 @@ void x_EventLoop(char *selectedfile, size_t selectedfilesize)
 				x_UpdateScreen(x_HandleKey(XK_Page_Down, selectedfile, selectedfilesize), selectedfile);
 				break;
 			}
-			nr=event.xbutton.y/(thumbheight+20)*
+			nr=(unsigned int)event.xbutton.y/(thumbheight+20)*
 			    THUMB_INLINE[THUMB_MODE]+
-			    event.xbutton.x/thumbwidth;
+			    (unsigned int)event.xbutton.x/thumbwidth;
 
 			if (nr<THUMB_COUNT[THUMB_MODE]) {
 				if ((get_file(file,nr)!=NULL)&&(*get_file(file,nr)!=0)) {
@@ -1183,10 +1196,10 @@ void x_EventLoop(char *selectedfile, size_t selectedfilesize)
 			while (XCheckTypedEvent(display,ConfigureNotify,&event));
 			fp=fopen(configpath,"w");
 			if (fp!=0) {
-				cf.x=event.xconfigure.x;
-				cf.y=event.xconfigure.y;
-				cf.w=event.xconfigure.width;
-				cf.h=event.xconfigure.height;
+				cf.x = (unsigned int)event.xconfigure.x;
+				cf.y = (unsigned int)event.xconfigure.y;
+				cf.w = (unsigned int)event.xconfigure.width;
+				cf.h = (unsigned int)event.xconfigure.height;
 				fprintf(fp,"\n# iiviewrc - configuration file for iiview\n\n");
 				fprintf(fp,"xpos=%d\n",cf.x);
 				fprintf(fp,"ypos=%d\n",cf.y);

@@ -1,4 +1,6 @@
 
+#include <stddef.h>
+
 #include "modules.h"
 #include "pixeltools.h"
 

@@ -43,13 +43,13 @@ Infos: see modules.c
 #define MODULES_COUNT 5
 
 typedef struct {
-	int               extension_count;
+	size_t            extension_count;
 	const char        **extension;
 	int               (*open)(const char *,const char *, unsigned int, unsigned int);
 	void              (*close)(void);
 	unsigned int      (*getpixel)(int,int,int);
-	int               (*getwidth)(void);
-	int               (*getheight)(void);
+	size_t            (*getwidth)(void);
+	size_t            (*getheight)(void);
 
 	/* directory handler routines */
 	int (*getfilelist)(const char *,const char *);

@@ -38,8 +38,8 @@ typedef struct {
 extern int BMP_OpenFile(const char *,const char *, unsigned int, unsigned int);
 extern void BMP_CloseFile(void);
 extern unsigned int BMP_GetPixel(int,int,int);
-extern int BMP_GetWidth(void);
-extern int BMP_GetHeight(void);
+extern size_t BMP_GetWidth(void);
+extern size_t BMP_GetHeight(void);
 
 #endif
 

@@ -183,10 +183,12 @@ unsigned int  getpixel_jpeg(int x, int y, int color) {
 			  return (val>>16)|(val&0xFF00)|((val&0xFF)<<16);*/
 		}
 }
-int getwidth_jpeg(void) {
+
+size_t getwidth_jpeg(void) {
 	return cinfo.output_width;
 }
-int getheight_jpeg(void) {
+
+size_t getheight_jpeg(void) {
 	return cinfo.output_height;
 }
 

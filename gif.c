@@ -11,7 +11,7 @@
 #define M_IMAGE       0x2C
 #define M_EXTENSION   0x21
 
-static int gif_width,gif_height;
+static size_t gif_width,gif_height;
 static FILE *giffile;
 static long int gif_filesize;
 static const char *gifmarker="GIF";
@@ -292,12 +292,12 @@ unsigned int GIF_GetPixel(int x,int y,int col)
 	    (((color&0xFF)+((color>>8)&0xFF)+((color>>16)&0xFF))/3)*0x010101;
 }
 
-int GIF_GetWidth(void)
+size_t GIF_GetWidth(void)
 {
 	return gif_width;
 }
 
-int GIF_GetHeight(void)
+size_t GIF_GetHeight(void)
 {
 	return gif_height;
 }
