@@ -466,13 +466,16 @@ void x_ClearThumbs(void) {
 
 	delete_all_data(file);
 
-	thumbwidth =cf.w/THUMB_INLINE[THUMB_MODE];
-	thumbstride=thumbwidth*pixel_bytes;
+	thumbwidth  = cf.w/THUMB_INLINE[THUMB_MODE];
+	thumbstride = thumbwidth*pixel_bytes;
+	thumbheight = cf.h > 20 * THUMB_LINES[THUMB_MODE] ?
+	    (cf.h-20*(THUMB_LINES[THUMB_MODE]))/
+	    THUMB_LINES[THUMB_MODE] : 0;
 
-	thumbheight=(cf.h-20*(THUMB_LINES[THUMB_MODE]))/
-	    THUMB_LINES[THUMB_MODE];
-
-	if (thumbheight>10) window_big_enough=1; else window_big_enough=0;
+	if (thumbheight>10)
+		window_big_enough=1;
+	else
+		window_big_enough=0;
 
 	if ((blackimage=x_AllocImage(thumbwidth, thumbheight+20, bitsperpixel))!=NULL) {
 

@@ -45,7 +45,7 @@ int fbmode=0;
 int event_occured=0;
 int update_needed=0;
 int exitnow=0;
-unsigned int thumbwidth,thumbheight;
+unsigned int thumbwidth = 0,thumbheight = 0;
 
 /* structure for window coordinates */
 config_struct cf;
