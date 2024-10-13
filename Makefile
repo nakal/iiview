@@ -89,7 +89,8 @@ clean:
 install:
 	strip $(EXECNAME)
 	install -m 755 $(EXECNAME) $(DESTDIR)$(PREFIX)/bin
-	install -m 755 ./man/man1/iiview.1.gz $(DESTDIR)$(PREFIX)/man/man1
+	install -m 755 ./man/man1/iiview.1.gz \
+		$(DESTDIR)$(PREFIX)/share/man/man1
 
 main.o: common.h filelist.h modules.h xsupport.h main.c
 	$(CC) $(DEFS) $(OPTS) $(WARN) -c -o main.o $(INCPATH) main.c
