@@ -26,8 +26,8 @@ static unsigned char *gif_data,*data;
 static int gif_interlaced=0;
 static int bitpos,maxbits;
 static unsigned char bitbuf[256];
-static int initcodesize,codesize,codemask,gif_ipixel,gif_iindex,
-	   gif_ipassnr,gif_ipassinc;
+static int initcodesize, codesize, codemask, gif_ipassnr, gif_ipassinc;
+static size_t gif_ipixel, gif_iindex;
 
 /* prototypes */
 void readColormap(int);
@@ -68,7 +68,7 @@ static int readCode(void)
 
 static void saveColor(int nr)
 {
-	if (data-gif_data>=gif_width*gif_height) {
+	if ((size_t)(data - gif_data) >= gif_width * gif_height) {
 		/* printf("Error: data overflow.\n"); */
 		return;
 	}
@@ -101,13 +101,26 @@ static void saveColor(int nr)
 
 static int readImage(void)
 {
-	int leftoffs,topoffs,info,CC,EOFC,savecode,
-	    code,lastcode=0,lastchar=0,curcode,freecode,initfreecode,outcodenr;
+#ifdef DEBUG
+	int leftoffs,topoffs;
+#endif
+	int info,CC,EOFC,savecode,
+	    code,lastcode=0,lastchar=0,curcode,freecode,
+	    initfreecode,outcodenr;
 	int prefix[4096];
 	unsigned char suffix[4096],output[4096];
 
-	leftoffs=gif_readword();topoffs=gif_readword();
-	gif_width=gif_readword();gif_height=gif_readword();
+#ifdef DEBUG
+	leftoffs =
+#endif
+	    gif_readword();
+#ifdef DEBUG
+	topoffs =
+#endif
+	    gif_readword();
+
+	gif_width = gif_readword();
+	gif_height = gif_readword();
 
 	gif_data=(unsigned char *)malloc((size_t)(gif_width*gif_height));
 
@@ -121,10 +134,12 @@ static int readImage(void)
 	gif_interlaced=info&0x40;
 	if (info&0x80) readColormap((int)1 <<((info&7)+1));
 
-	/*  if (leftoffs||topoffs) {
+#ifdef DEBUG
+	if (leftoffs||topoffs) {
 	    printf("Warning: image offset (%i, %i)\n",leftoffs,topoffs);
 	    return 1;
-	    }*/
+	}
+#endif
 
 	data=gif_data;
 	initcodesize=fgetc(giffile);
@@ -283,7 +298,8 @@ unsigned int GIF_GetPixel(int x,int y,int col)
 {
 	int color;
 
-	if ((x>=gif_width)||(y>=gif_height))
+	if (((size_t)x >= gif_width) ||
+	    ((size_t)y >= gif_height))
 		return 0x000000;
 
 	color=gif_pal[gif_data[y*gif_width+x]];

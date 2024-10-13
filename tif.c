@@ -14,7 +14,7 @@
 #include "tif.h"
 
 static TIFF* tif_file;
-static uint32* tif_raster=NULL;
+static uint32_t* tif_raster = NULL;
 static unsigned int tif_width=0;
 static unsigned int tif_height=0;
 
@@ -52,7 +52,7 @@ int TIF_OpenFile(const char *filename,const char *imgdir,
 		TIFFGetField(tif_file, TIFFTAG_IMAGEWIDTH, &tif_width);
 		TIFFGetField(tif_file, TIFFTAG_IMAGELENGTH, &tif_height);
 		npixels = tif_width * tif_height;
-		tif_raster = (uint32*) _TIFFmalloc((int)(npixels * sizeof (uint32)));
+		tif_raster = _TIFFmalloc((int)(npixels * sizeof (uint32_t)));
 		if (tif_raster != NULL) {
 			if (!TIFFReadRGBAImage(tif_file,tif_width,tif_height,tif_raster, 0)) {
 #ifdef VERBOSE

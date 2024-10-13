@@ -424,7 +424,7 @@ static void x_SetTitle(const char *suffix, size_t picw, size_t pich) {
 	size_t title_len;
 	char *title;
 	const char *glue=" - ";
-	char dim[33];
+	char dim[64];
 	XTextProperty wintitle;
 
 	if (picw==0 || pich==0) dim[0]=0;
@@ -1052,6 +1052,7 @@ int x_HandleKey(KeySym key, char *selectedfile, size_t selectedfilesize)
 			}
 			break;
 		}
+		break;
 	case XK_Left:
 	case XK_KP_4:
 		return x_prevPic();
@@ -1076,6 +1077,7 @@ int x_HandleKey(KeySym key, char *selectedfile, size_t selectedfilesize)
 			}
 			break;
 		}
+		break;
 	case XK_Right:
 	case XK_KP_6:
 		return x_nextPic();

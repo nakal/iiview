@@ -1,5 +1,5 @@
 ##
-## This is the Makefile for iiview for Linux/FreeBSD
+## This is the Makefile for iiview for Linux
 ##
 ## if some libraries cannot be found set the
 ## INCPATH and LIBPATH variables properly

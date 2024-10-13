@@ -8,8 +8,6 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#include "compat.h"
-
 /* unix specific includes */
 #include <signal.h>
 #include <sys/types.h>
@@ -17,20 +15,28 @@
 #include <sys/param.h>
 
 #include "common.h"
+#include "compat.h"
 
 #include "filelist.h"
 #include "modules.h"
-#ifndef NO_X_SUPPORT
-#include "xsupport.h"
-#else
+
+/* check target platform */
+#ifdef NO_X_SUPPORT
 #ifndef FRAMEBUFFER
 #error !!! Illegal combination of compiler switches !!! (NO_XSUPPORT + !FRAMEBUFFER)
 #endif
 #endif
-#ifdef _FREEBSD
-#error !!! No framebuffer support for FreeBSD !!!
-#else
+
+#ifndef NO_X_SUPPORT
+#include "xsupport.h"
+#endif
+
+#ifdef FRAMEBUFFER
+#if defined(__linux__)
 #include "fbsupport.h"
+#else
+#error Framebuffer is only supported for Linux.
+#endif
 #endif
 
 struct file_p *file=NULL;
@@ -101,7 +107,7 @@ void GetFileList(void)
 					strlcpy(filename,"/", sizeof(filename));
 				else filename[0]=0;
 
-				strncat(filename, de->d_name, MAXPATHLEN);
+				strncat(filename, de->d_name, MAXPATHLEN - 1);
 				insert_file(&file, filename);
 			}
 

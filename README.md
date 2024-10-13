@@ -43,10 +43,10 @@ appropriate directory.
 
 ### Supported systems
 
-This version runs on other systems, too I hope:
+- Linux
+- FreeBSD
 
-- Linux kernel >= 2.2.0 ! (Intel)
-- FreeBSD 5.1		  (Intel)
+Other systems and platforms might work, too.
 
 ### Required libraries
 
