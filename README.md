@@ -1,6 +1,9 @@
 
 # iiview for Linux/Unix - by nakal
 
+| Repository moved to: `https://codeberg.org/nakal/iiview` |
+|---|
+
 **iiview is an image viewer - mainly for X** - that allows
 easy navigation through thumb views and full screen
 view. The most notable feature is that it only has a
